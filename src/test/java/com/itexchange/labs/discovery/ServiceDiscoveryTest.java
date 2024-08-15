@@ -11,7 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
@@ -47,7 +46,7 @@ class ServiceDiscoveryTest {
         final int numberOfThreads = 1000;
 
         try (var executor = Executors.newFixedThreadPool(numberOfThreads)) {
-            List<String> instances = Stream.generate(() -> new ServiceDiscoveryTask(serviceDiscovery, ACCOUNT_SERVICE))
+            var instances = Stream.generate(() -> new ServiceDiscoveryTask(serviceDiscovery, ACCOUNT_SERVICE))
                     .limit(numberOfThreads)
                     .map(executor::submit)
                     .map(f -> {
@@ -68,7 +67,7 @@ class ServiceDiscoveryTest {
         final int numberOfThreads = 1000;
 
         try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            List<String> instances = Stream.generate(() -> new ServiceDiscoveryTask(serviceDiscovery, USER_SERVICE))
+            var instances = Stream.generate(() -> new ServiceDiscoveryTask(serviceDiscovery, USER_SERVICE))
                     .limit(numberOfThreads)
                     .map(executor::submit)
                     .map(f -> {
@@ -85,17 +84,16 @@ class ServiceDiscoveryTest {
 
     @Test
     void should_discover_instance_using_least_connections_load_balancer_and_fixed_thread_pool() {
-        LeastConnectionsLoadBalancer leastConnectionsLoadBalancer = new LeastConnectionsLoadBalancer();
+        var leastConnectionsLoadBalancer = new LeastConnectionsLoadBalancer();
         serviceDiscovery.setLoadBalancer(leastConnectionsLoadBalancer);
 
         IntStream.range(0, 5).forEach(i -> leastConnectionsLoadBalancer.incrementConnection(INSTANCE_1));
         IntStream.range(0, 5).forEach(i -> leastConnectionsLoadBalancer.incrementConnection(INSTANCE_2));
 
-
         final int numberOfThreads = 10;
 
         try (var executor = Executors.newFixedThreadPool(numberOfThreads)) {
-            List<String> instances = Stream.generate(() -> new ServiceDiscoveryTask(serviceDiscovery, ACCOUNT_SERVICE))
+            var instances = Stream.generate(() -> new ServiceDiscoveryTask(serviceDiscovery, ACCOUNT_SERVICE))
                     .limit(numberOfThreads)
                     .map(executor::submit)
                     .map(f -> {
